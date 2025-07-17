@@ -1,0 +1,22 @@
+
+@media print {
+  /* برای جدول با خطوط کامل دور سلول‌ها */
+  .print-table,
+  .print-table th,
+  .print-table td {
+    border: 1px solid #000 !important;
+    border-collapse: collapse !important; /* حاشیه‌ها روی هم نیفتد */
+  }
+
+  /* اگر فقط خط بین ردیف‌ها می‌خواستید */
+  .table-row-divider tbody tr + tr > * {
+    border-top: 1px solid #000 !important;
+  }
+
+  /* رنگ پس‌زمینهٔ هدرتیبل را هم ثابت کنید (دلخواه) */
+  .print-table thead th {
+    background: #f8f9fa !important; /* خاکستری ملایم */
+    -webkit-print-color-adjust: exact; /* سافاری/کروم */
+    print-color-adjust: exact;        /* فایرفاکس */
+  }
+}
