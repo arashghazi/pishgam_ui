@@ -40,7 +40,14 @@ export default class ObjectClassController {
     static async classtoObject(data) {
         let props = await BasePropertyController.GetPropertyList(data.OCP);
         let Extended = JSON.parse(data.Exd);
-        data = { ...data, properties: props, Extended: Extended };
+        try{
+            let formats=JSON.parse(Extended.PropertyFormat)
+            data = { ...data, properties: props, Extended: Extended,formats:formats };
+            
+        }
+        catch{
+             data = { ...data, properties: props, Extended: Extended};
+        }
         return data;
     }
     static Update(datamodel) {
@@ -269,8 +276,17 @@ export default class ObjectClassController {
                                         
                                         row.controls[j].source = s;
                                     }
-                                    else
-                                        row.controls[j].source = await SearchObject(con, baseproperty.PSource, '<>');
+                                    else{
+                                        const formatItem = oc.formats?.find(x => x.ID === row.controls[j].pid);
+                                        if(formatItem){
+                                            con=formatItem.Condition;
+                                            let prop = formatItem.Prop;
+                                            row.controls[j].source = await SearchObject(con, baseproperty.PSource, '<>','',prop);
+                                        }
+                                        else{
+                                            row.controls[j].source = await SearchObject(con, baseproperty.PSource, '<>');
+                                        }
+                                    }
                                 }
                             } catch (error) {
                                 console.log(error, row.controls[j].pid)

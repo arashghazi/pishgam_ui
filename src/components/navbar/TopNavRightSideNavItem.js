@@ -15,7 +15,6 @@ const TopNavRightSideNavItem = () => {
     let org = localStorage.getItem('org');
     org = JSON.parse(org);
     let isAdmin = localStorage.getItem('user-mode')==='["R2"]';
-    console.log(localStorage.getItem('user-mode'))
     return (
             <Nav navbar className="navbar-nav-icons ml-auto flex-row align-items-center">
                 <NavItem>

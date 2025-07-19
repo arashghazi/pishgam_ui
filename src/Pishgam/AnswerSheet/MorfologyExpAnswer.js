@@ -13,13 +13,15 @@ const MorfologyExpAnswer = () => {
     const [data, setData] = useState({ items: [], a: 1 });
     const [instance, setInstance] = useState(NewInstance());
     const [reportBuilding, setreportBuilding] = useState(0);
+    const [avglist, setAvglist] = useState([]);
     useEffect(() => {
         const fetch = async () => {
             let temp = await SearchObject('', 'O30E12C47', '<>', ' order by convert(int,PC2) ');
             setCellTypeList(temp);
         }
-        if (!cellTypeList)
+        if (!cellTypeList) {
             fetch();
+        }
     }, [cellTypeList])
 
     const onChangedCellCounterValue = (id, value, type) => {
@@ -34,6 +36,7 @@ const MorfologyExpAnswer = () => {
     }
     const PropertyChanged = async (value, prop) => {
         if (prop === 'P9') {
+
             let tempData = await FromManagerDataTemplate.LoadByAsync(`#${value.id}#expected#`);
             if (tempData) {
                 let temp = JSON.parse(tempData.Json);
@@ -52,18 +55,18 @@ const MorfologyExpAnswer = () => {
                 ins.Prop.push({ PID: 'P9', IPV: value.id, OBJ: value });
                 setInstance(ins)
             }
+            await SummaryStatistics();
         }
         else if (prop === 'P59') {
             let ins = { ...instance };
             let index = ins.Prop.findIndex(x => x.PID === 'P59');
-            ins.Prop.splice(index, index > -1 ? 1 : 0, { PID: 'P59', IPV: value.id, OBJ: value })
-            setInstance(ins)
-            //setData(tempData);
+            ins.Prop.splice(index, index > -1 ? 1 : 0, { PID: 'P59', IPV: value.id, OBJ: value });
+            setInstance(ins);
         }
     }
     const Save = async () => {
         if (data) {
-            data.Diagnosis = instance.Prop.find(x=>x.PID==='P59').OBJ;
+            data.Diagnosis = instance.Prop.find(x => x.PID === 'P59').OBJ;
             let temp = new FromManagerDataTemplate();
             if (data.ID)
                 temp.ID = data.ID;
@@ -72,14 +75,18 @@ const MorfologyExpAnswer = () => {
             await temp.SaveAsync();
         }
     }
-    const BuildReport=async()=>{
+    const BuildReport = async () => {
         setreportBuilding(1);
 
         let result = await InstanceController.InvokeMethod('O30E12C60', 'GetMorfoResultCount',
-        `${instance.Prop.find(x=>x.PID==='P9').IPV}#${instance.Prop.find(x=>x.PID==='P59').IPV}`);
-        if(Utility.IsInstanceID(result))
+            `${instance.Prop.find(x => x.PID === 'P9').IPV}#${instance.Prop.find(x => x.PID === 'P59').IPV}`);
+        if (Utility.IsInstanceID(result))
             setreportBuilding(2);
-        console.log(result)
+    }
+    const SummaryStatistics = async () => {
+        let result = await InstanceController.InvokeMethod('O30E12C119', 'SummaryStatistics',
+            `${instance.Prop.find(x => x.PID === 'P9').IPV}#`);
+        setAvglist(result);
     }
     return (
         <Card>
@@ -94,6 +101,7 @@ const MorfologyExpAnswer = () => {
                             <th>Cell Type</th>
                             <th>Minimum</th>
                             <th>Maximum</th>
+                            <th>Avrage</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -117,6 +125,9 @@ const MorfologyExpAnswer = () => {
                                             value={data?.items?.find(x => x.id === item.id)?.max ?? ''}
                                             onChange={({ target }) => onChangedCellCounterValue(item.id, target.value, 'max')}
                                         /></td>
+                                    <td>
+                                        <p>{avglist?.find(avg => avg.P54 === item.id)?.avg}</p>
+                                    </td>
                                 </tr>);
                             })
                         }
@@ -126,7 +137,7 @@ const MorfologyExpAnswer = () => {
             <CardFooter >
                 <Button className="mr-2" outline color='primary' onClick={Save} > {'ذخیره'}</Button >
                 <Button className="mr-2" outline color='success' onClick={BuildReport} > {'ساخت گزارش'}</Button >
-                {reportBuilding>0?(reportBuilding==1?<Spinner type='grow' color='success' />:<FontAwesomeIcon icon={faCheck}  />):null}
+                {reportBuilding > 0 ? (reportBuilding == 1 ? <Spinner type='grow' color='success' /> : <FontAwesomeIcon icon={faCheck} />) : null}
             </CardFooter>
         </Card>
     );

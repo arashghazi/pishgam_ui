@@ -2,8 +2,8 @@
 import { AuthenticationController } from './Authentication';
 export const settings = {
   RootServer:'https://eqasonline.ir',
-  //Server: `https://localhost:7276/api/V1/`,
-  Server: `https://api2.eqasonline.ir/api/V1/`,
+  Server: `https://localhost:7276/api/V1/`,
+  //Server: `https://api2.eqasonline.ir/api/V1/`,
   headers: {
     ContentType: 'application/json; charset=utf-8;',
     "Access-Control-Allow-Credentials": true,
